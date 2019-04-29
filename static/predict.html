@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Predictions</title>
+</head>
+<body>
+	<input type="file" name="image-selector">
+	<button id ="predict-button">Predict</button>
+	<p>Predcitions</p>
+	<p>CNV: <span id="CNV-prediction"></span></p>
+	<p>DRUSEN: <span id="DME-prediction"></span></p>
+
+	<p>NORMAL : <span id="DRUSEN-prediction"></span></p>
+
+	<p>DME: <span id="NORMAL-prediction"></span></p>
+	<img id="selected-images" src=""/>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script>
+
+	let base64Image;
+	$("#image-selector").change(function(){
+		let reader =new FileReader();
+		reader.onload = function(e){
+			let dataURL =reader.result;
+			$('#selected-images').attr('src',dataURL);
+			base64Image = dataURL.replace("data:image/png;base64,","");
+			console.log(base64Image);
+		}
+		reader.readAsDataURL($('#image-selector')[0].files[0]);
+ 		$('#CNV-prediction').text('');
+		$('#DRUSEN-prediction').text('');
+		$('#DME-prediction').text('');
+		$('#NORMAL-prediction').text('');
+	});
+
+	$("#predict-button").click(function(event){
+		let message = {
+			image: base64Image
+		}
+		console.log(message);
+		$.post('http://localhost:5000/predict',JSON.stringify(message),function(response){
+			$('#CNV-prediction').text(response.prediction.CNV.toFixed(6));
+			$('#DME-prediction').text(response.prediction.DME.toFixed(6));
+			$('#DRUSEN-prediction').text(response.prediction.DRUSEN.toFixed(6));
+			$('#NORMAL-prediction').text(response.prediction.NORMAL.toFixed(6));
+			console.log(response);
+
+
+		});
+	});
+
+</script>
+</body>
+</html>
